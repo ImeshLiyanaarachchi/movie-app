@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light theme variables */
+  --color-bg: #f5f5f5;
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --color-card: #ffffff;
+  --color-accent: #1976d2;
+  --color-accent-rgb: 25, 118, 210;
+  --color-sidebar: #fff;
+  --color-btn: #e0e0e0;
+  --color-btn-hover: #d0d0d0;
+  --color-success: #00b86b;
+}
+
+/* Dark theme variables */
+.dark-mode {
+  --color-bg: #1a1f37;  /* Dark navy background */
+  --color-text: #ffffff;
+  --color-text-light: #a3aed0;
+  --color-card: #222b45;  /* Slightly lighter navy for cards */
+  --color-accent: #00b86b;
+  --color-accent-rgb: 0, 184, 107;
+  --color-sidebar: #151a30;  /* Darkest navy for sidebar */
+  --color-btn: #2a3547;  /* Button background */
+  --color-btn-hover: #344767;  /* Button hover state */
+  --color-success: #16ff6e;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Smooth transitions for theme changes */
+button, a, div, nav {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease;
+}
+
+/* Custom scrollbar for dark mode */
+.dark-mode::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dark-mode::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+.dark-mode::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 5px;
+}
+
+.dark-mode::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+.dark-mode .sidebar {
+  background: var(--color-sidebar);
+}
+
+.dark-mode .card, .dark-mode .navbar, .dark-mode .searchbar, .dark-mode .filterbar {
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+.dark-mode .accent {
+  color: var(--color-accent);
+}
+
+.dark-mode .btn {
+  background: var(--color-btn);
+  color: var(--color-text);
+}
+
+.dark-mode .btn:hover {
+  background: var(--color-btn-hover);
+}
+
+.dark-mode .success {
+  color: var(--color-success);
+}
