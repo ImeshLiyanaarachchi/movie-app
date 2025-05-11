@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
+import { login, clearError } from '../store/slices/authSlice';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -92,18 +94,19 @@ const Message = styled.p`
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated, error } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setTimeout(() => navigate('/home'), 800);
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Hardcoded credentials
-    if (username === 'admin' && password === '1234') {
-      setMessage('✅ Login successful!');
-      setTimeout(() => navigate('/home'), 800); // Navigate after a short delay
-    } else {
-      setMessage('❌ Invalid username or password.');
-    }
+    dispatch(login({ username, password }));
   };
 
   return (
@@ -125,9 +128,14 @@ const Login = () => {
           />
           <Button type="submit">Login</Button>
         </Form>
-        {message && (
-          <Message success={message.includes('successful')}>
-            {message}
+        {error && (
+          <Message success={false}>
+            ❌ {error}
+          </Message>
+        )}
+        {isAuthenticated && (
+          <Message success={true}>
+            ✅ Login successful!
           </Message>
         )}
       </LoginCard>

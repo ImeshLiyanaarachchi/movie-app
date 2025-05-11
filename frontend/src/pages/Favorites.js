@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import NavBar from '../components/NavBar';
 import MovieCard from '../components/MovieCard';
 import Loader from '../components/Loader';
+import { fetchFavoriteDetails, removeFromFavorites } from '../store/slices/favoritesSlice';
 import axiosInstance from '../utils/Axios';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
@@ -9,35 +11,17 @@ const MOVIE_DETAILS_URL = (id) => `movie/${id}?api_key=${API_KEY}`;
 const TRAILERS_URL = (id) => `movie/${id}/videos?api_key=${API_KEY}`;
 
 const Favorites = () => {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { favorites, favoriteIds, loading, error } = useSelector(state => state.favorites);
+  
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [details, setDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [trailers, setTrailers] = useState([]);
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      setLoading(true);
-      try {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        const movieDetails = await Promise.all(
-          favorites.map(id => 
-            axiosInstance.get(MOVIE_DETAILS_URL(id))
-              .then(res => res.data)
-              .catch(() => null)
-          )
-        );
-        setMovies(movieDetails.filter(movie => movie !== null));
-      } catch (err) {
-        setError('Failed to load favorites.');
-      }
-      setLoading(false);
-    };
-
-    fetchFavorites();
-  }, []);
+    dispatch(fetchFavoriteDetails(favoriteIds));
+  }, [dispatch, favoriteIds]);
 
   const handleCardClick = (movie) => {
     setSelectedMovie(movie);
@@ -62,11 +46,8 @@ const Favorites = () => {
       });
   };
 
-  const removeFromFavorites = (movieId) => {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const updatedFavorites = favorites.filter(id => id !== movieId);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    setMovies(movies.filter(movie => movie.id !== movieId));
+  const handleRemoveFromFavorites = (movieId) => {
+    dispatch(removeFromFavorites(movieId));
     setSelectedMovie(null);
     setDetails(null);
   };
@@ -91,7 +72,7 @@ const Favorites = () => {
         
         {loading ? (
           <Loader text="Loading your favorites..." />
-        ) : movies.length === 0 ? (
+        ) : favorites.length === 0 ? (
           <div style={{ 
             textAlign: 'center', 
             padding: '3rem', 
@@ -114,7 +95,7 @@ const Favorites = () => {
             maxWidth: '1200px',
             margin: '0 auto'
           }}>
-            {movies.map((movie) => (
+            {favorites.map((movie) => (
               <MovieCard key={movie.id} movie={movie} onClick={handleCardClick} />
             ))}
           </div>
@@ -169,7 +150,7 @@ const Favorites = () => {
                       View on TMDb
                     </a>
                     <button
-                      onClick={() => removeFromFavorites(details.id)}
+                      onClick={() => handleRemoveFromFavorites(details.id)}
                       style={{
                         background: 'none',
                         border: 'none',

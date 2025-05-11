@@ -1,42 +1,52 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import NavBar from '../components/NavBar';
 import MovieCard from '../components/MovieCard';
 import FilterBar from '../components/FilterBar';
 import Loader from '../components/Loader';
+import { fetchTrending } from '../store/slices/moviesSlice';
 import axiosInstance from '../utils/Axios';
 
 const API_KEY = process.env.REACT_APP_TMDB_API_KEY;
-const TRENDING_URL = (page) => `trending/movie/week?api_key=${API_KEY}&page=${page}`;
 const MOVIE_DETAILS_URL = (id) => `movie/${id}?api_key=${API_KEY}`;
 const TRAILERS_URL = (id) => `movie/${id}/videos?api_key=${API_KEY}`;
 
 const Trending = () => {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const dispatch = useDispatch();
+  const { trending, loading, error, currentPage, totalPages } = useSelector(state => state.movies);
+  
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [details, setDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [trailers, setTrailers] = useState([]);
-  const loader = useRef();
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
 
-  const fetchMovies = (reset = false, nextPage = 1) => {
-    setLoading(true);
-    axiosInstance.get(TRENDING_URL(nextPage))
-      .then((res) => {
-        const data = res.data;
-        setMovies(reset ? data.results : [...movies, ...data.results]);
-        setHasMore(data.page < data.total_pages);
-        setLoading(false);
-        setPage(nextPage);
-      })
-      .catch((err) => {
-        setError('Failed to fetch trending movies.');
-        setLoading(false);
-      });
-  };
+  useEffect(() => {
+    dispatch(fetchTrending(1));
+  }, [dispatch]);
+
+  useEffect(() => {
+    setHasMore(currentPage < totalPages);
+  }, [currentPage, totalPages]);
+
+  const handleObserver = useCallback((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && hasMore && !loading) {
+      dispatch(fetchTrending(currentPage + 1));
+    }
+  }, [dispatch, hasMore, loading, currentPage]);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: '20px',
+      threshold: 1.0
+    };
+    const observer = new window.IntersectionObserver(handleObserver, option);
+    if (loader.current) observer.observe(loader.current);
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   const handleCardClick = (movie) => {
     setSelectedMovie(movie);
@@ -60,28 +70,6 @@ const Trending = () => {
         }
       });
   };
-
-  useEffect(() => {
-    fetchMovies(true, 1);
-  }, []);
-
-  const handleObserver = useCallback((entries) => {
-    const target = entries[0];
-    if (target.isIntersecting && hasMore && !loading) {
-      fetchMovies(false, page + 1);
-    }
-  }, [hasMore, loading, page]);
-
-  useEffect(() => {
-    const option = {
-      root: null,
-      rootMargin: '20px',
-      threshold: 1.0
-    };
-    const observer = new window.IntersectionObserver(handleObserver, option);
-    if (loader.current) observer.observe(loader.current);
-    return () => observer.disconnect();
-  }, [handleObserver]);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', color: 'var(--color-text)' }}>
@@ -111,7 +99,7 @@ const Trending = () => {
           maxWidth: '1400px',
           margin: '0 auto'
         }}>
-          {movies.map((movie) => (
+          {trending.map((movie) => (
             <MovieCard key={movie.id} movie={movie} onClick={handleCardClick} />
           ))}
         </div>
@@ -154,19 +142,21 @@ const Trending = () => {
                   <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}><b>Runtime:</b> {details.runtime} min</p>
                   <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}><b>Genres:</b> {details.genres && details.genres.map(g => g.name).join(', ')}</p>
                   <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}><b>Overview:</b> {details.overview}</p>
-                  <a 
-                    href={`https://www.themoviedb.org/movie/${details.id}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{
-                      color: 'var(--color-accent)',
-                      textDecoration: 'none',
-                      fontSize: '1.1rem',
-                      fontWeight: '500'
-                    }}
-                  >
-                    View on TMDb
-                  </a>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                    <a 
+                      href={`https://www.themoviedb.org/movie/${details.id}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{
+                        color: 'var(--color-accent)',
+                        textDecoration: 'none',
+                        fontSize: '1.1rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      View on TMDb
+                    </a>
+                  </div>
                   {trailers.length > 0 && (
                     <div style={{ marginTop: '1.5rem' }}>
                       <h4 style={{ fontSize: '1.3rem', marginBottom: '1rem' }}>Trailer</h4>

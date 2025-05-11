@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
+import { toggleTheme } from '../store/slices/themeSlice';
+import { logout } from '../store/slices/authSlice';
 
 const Nav = styled.nav`
   background: var(--color-card);
@@ -73,41 +76,36 @@ const DarkModeButton = styled.button`
   }
 `;
 
-const getInitialMode = () => {
-  // Check if theme was previously set
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    return savedTheme === 'dark';
+const LogoutButton = styled.button`
+  color: var(--color-text);
+  background: none;
+  border: none;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: #ff4444;
+    color: white;
+    transform: translateY(-2px);
   }
-  
-  // If no saved theme, return true for dark mode as default
-  return true;
-};
+`;
 
 const NavBar = () => {
-  const [darkMode, setDarkMode] = useState(getInitialMode());
-
-  useEffect(() => {
-    // Set initial theme class on body
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-    // Save theme preference
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
+  const dispatch = useDispatch();
+  const { darkMode } = useSelector(state => state.theme);
+  
+  const handleToggleDarkMode = () => {
+    dispatch(toggleTheme());
   };
 
-  // Set initial dark mode class when component mounts
-  useEffect(() => {
-    if (getInitialMode()) {
-      document.body.classList.add('dark-mode');
-    }
-  }, []);
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
     <Nav>
@@ -125,11 +123,14 @@ const NavBar = () => {
           Favorites
         </StyledLink>
         <DarkModeButton 
-          onClick={toggleDarkMode} 
+          onClick={handleToggleDarkMode} 
           title="Toggle dark mode"
         >
           {darkMode ? '☀️' : '🌙'}
         </DarkModeButton>
+        <LogoutButton onClick={handleLogout}>
+          Logout
+        </LogoutButton>
       </NavLinks>
     </Nav>
   );

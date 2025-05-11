@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToFavorites, removeFromFavorites } from '../store/slices/favoritesSlice';
 
 const IMG_BASE = 'https://image.tmdb.org/t/p/w300';
 
 const MovieCard = ({ movie, onClick }) => {
+  const dispatch = useDispatch();
+  const { favoriteIds } = useSelector(state => state.favorites);
   const [isFav, setIsFav] = useState(false);
 
   useEffect(() => {
-    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-    setIsFav(favs.includes(movie.id));
-  }, [movie.id]);
+    setIsFav(favoriteIds.includes(movie.id));
+  }, [favoriteIds, movie.id]);
 
   const toggleFavorite = (e) => {
     e.stopPropagation();
-    let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
     if (isFav) {
-      favs = favs.filter(id => id !== movie.id);
+      dispatch(removeFromFavorites(movie.id));
     } else {
-      favs.push(movie.id);
+      dispatch(addToFavorites(movie.id));
     }
-    localStorage.setItem('favorites', JSON.stringify(favs));
-    setIsFav(!isFav);
   };
 
   if (!movie) return null;

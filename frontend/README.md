@@ -18,6 +18,7 @@ A modern, responsive React application for discovering, searching, and managing 
   - Trailers (when available)
 **Trending Movies**: Dedicated page for trending movies
 **Modern UI**: Beautiful, intuitive interface
+**State Management**: Redux for centralized state management
 
 
 ### Installation
@@ -58,6 +59,13 @@ src/
 │   ├── Home.js        # Home page
 │   ├── Trending.js    # Trending movies
 │   └── Favorites.js   # Favorites page
+├── store/             # Redux store configuration
+│   ├── store.js       # Redux store setup
+│   └── slices/        # Redux slices
+│       ├── authSlice.js        # Authentication state
+│       ├── favoritesSlice.js   # Favorites management
+│       ├── moviesSlice.js      # Movies data
+│       └── themeSlice.js       # Theme preferences
 ├── utils/             # Utility functions
 │   └── Axios.js       # Axios configuration
 └── App.js             # Main app component
@@ -67,6 +75,8 @@ src/
 
 ### Authentication
 - Simple login system (demo credentials: admin/1234)
+- Protected routes for authenticated users
+- Redux-based authentication state management
 
 ### Movie Management
 - Browse movies with infinite scroll
@@ -77,9 +87,11 @@ src/
   - Rating
 - Add/remove movies to favorites
 - View detailed movie information
+- Redux for efficient movie state management
 
 ### Theme System
 - Toggle between light and dark modes
+- Redux-managed theme state with localStorage persistence
 - Consistent styling across the application
 
 ## 🔐 Environment Variables
@@ -89,4 +101,20 @@ The following environment variables are required:
 ```env
 REACT_APP_TMDB_API_KEY=c810ac402e06e7a84670ea1e14a6641f
 ```
+
+## Redux State Management
+
+The application uses Redux for centralized state management with the following store structure:
+
+- **Auth State**: Manages user authentication
+- **Movies State**: Handles movie data, search results, and trending movies
+- **Favorites State**: Manages user's favorite movies
+- **Theme State**: Controls the application's theme (dark/light mode)
+
+Redux provides several benefits:
+- Centralized state management
+- Predictable state updates
+- Easy debugging with Redux DevTools
+- Efficient API calls with Redux Thunk
+- Persistent state across the application
 
